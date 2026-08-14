@@ -1,1352 +1,1232 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-AR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La Peruana SRL - Sistema WhatsApp</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        :root {
-            --whatsapp: #25d366; --whatsapp-dark: #128c7e; --primary: #2c3e50;
-            --secondary: #3498db; --success: #27ae60; --warning: #f39c12;
-            --danger: #e74c3c; --light: #ecf0f1; --dark: #34495e;
-            --mercadopago: #00b1ea; --transfer: #28a745;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
-            min-height: 100vh; color: #333;
-        }
-        
-        .container {
-            max-width: 500px; margin: 0 auto; background: white;
-            min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.3);
-        }
-        
-        .header {
-            background: var(--whatsapp); color: white; padding: 20px;
-            text-align: center; position: relative;
-        }
-        
-        .header h1 {
-            font-size: 1.5em; margin-bottom: 5px;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-        }
-        
-        .status {
-            position: absolute; top: 15px; right: 15px;
-            background: #fff; color: var(--whatsapp); padding: 5px 10px;
-            border-radius: 15px; font-size: 0.8em; font-weight: bold;
-        }
-        
-        .main-content { padding: 20px; padding-bottom: 120px; }
-        
-        .welcome-card {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border-radius: 15px; padding: 20px; margin-bottom: 25px;
-            text-align: center; border: 2px solid var(--whatsapp);
-        }
-        
-        .sector-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-            gap: 12px; margin-bottom: 25px;
-        }
-        
-        .sector-btn {
-            background: white; border: 2px solid var(--light);
-            border-radius: 15px; padding: 12px; text-align: center;
-            cursor: pointer; transition: all 0.3s ease;
-        }
-        
-        .sector-btn:hover, .sector-btn.active {
-            border-color: var(--whatsapp); background: #f0fff4;
-            transform: translateY(-2px);
-        }
-        
-        .sector-btn i {
-            font-size: 1.6em; margin-bottom: 6px; display: block;
-        }
-        
-        .sector-btn .name {
-            font-weight: bold; font-size: 0.8em; color: var(--primary);
-        }
-        
-        .products-section {
-            background: white; border-radius: 15px; padding: 20px;
-            border: 2px solid var(--light); margin-bottom: 20px; display: none;
-        }
-        
-        .products-section.active {
-            display: block; border-color: var(--whatsapp);
-        }
-        
-        .section-title {
-            color: var(--primary); margin-bottom: 15px;
-            display: flex; align-items: center; gap: 10px;
-            padding-bottom: 10px; border-bottom: 2px solid var(--light);
-        }
-        
-        .product-item {
-            background: #f8f9fa; border-radius: 10px; padding: 15px;
-            display: flex; justify-content: space-between; align-items: center;
-            border: 1px solid var(--light); margin-bottom: 10px; transition: all 0.3s ease;
-        }
-        
-        .product-item:hover {
-            background: #e9ecef; border-color: var(--whatsapp);
-        }
-        
-        .product-info { flex: 1; }
-        
-        .product-name {
-            font-weight: bold; color: var(--primary); margin-bottom: 3px;
-        }
-        
-        .product-price {
-            color: var(--success); font-size: 1.1em; font-weight: bold;
-        }
-        
-        .product-unit {
-            color: var(--dark); font-size: 0.8em;
-        }
-        
-        .qty-controls {
-            display: flex; align-items: center; gap: 8px;
-        }
-        
-        .qty-btn {
-            background: var(--whatsapp); color: white; border: none;
-            width: 30px; height: 30px; border-radius: 50%;
-            cursor: pointer; font-weight: bold; font-size: 1.1em;
-        }
-        
-        .qty-btn:hover {
-            background: var(--whatsapp-dark);
-        }
-        
-        .qty-display {
-            min-width: 25px; text-align: center; font-weight: bold;
-            color: var(--primary);
-        }
-        
-        .cart-summary {
-            background: var(--whatsapp); 
-            color: white; 
-            border-radius: 15px 15px 0 0;
-            padding: 20px; 
-            margin: 0;
-            position: fixed; 
-            bottom: 0; 
-            left: 50%; 
-            transform: translateX(-50%);
-            max-width: 500px; 
-            width: 100%;
-            display: none;
-            z-index: 1000;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
-        }
-        
-        .cart-summary.active {
-            display: block;
-        }
-        
-        .cart-total {
-            font-size: 1.3em; font-weight: bold; text-align: center;
-            margin: 15px 0;
-        }
-        
-        .btn-whatsapp {
-            background: white; color: var(--whatsapp); width: 100%;
-            padding: 15px; border: none; border-radius: 25px;
-            font-weight: bold; cursor: pointer; font-size: 1.1em;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-        }
-        
-        .btn-whatsapp:hover {
-            background: #f0f0f0; transform: scale(1.02);
-        }
-        
-        .btn-clear {
-            background: rgba(255,255,255,0.2); color: white; 
-            width: 100%; padding: 10px; border: none; border-radius: 20px;
-            font-weight: bold; cursor: pointer; margin-bottom: 10px;
-        }
-        
-        .customer-form {
-            background: white; 
-            border-radius: 15px; 
-            padding: 20px;
-            margin: 20px auto; 
-            max-width: 500px;
-            display: none;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1001;
-            max-height: 85vh;
-            overflow-y: auto;
-        }
-        
-        .customer-form.active { display: block; }
-        
-        .form-group { margin-bottom: 15px; }
-        
-        .form-group label {
-            display: block; margin-bottom: 5px; font-weight: bold;
-            color: var(--primary);
-        }
-        
-        .form-group input, .form-group textarea, .form-group select {
-            width: 100%; padding: 12px; border: 2px solid var(--light);
-            border-radius: 8px; font-size: 14px;
-        }
-        
-        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
-            border-color: var(--whatsapp); outline: none;
-        }
-        
-        /* Estilos para medios de pago */
-        .payment-section {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border-radius: 12px;
-            padding: 15px;
-            margin: 15px 0;
-            border: 2px solid var(--light);
-        }
-        
-        .payment-title {
-            color: var(--primary);
-            font-weight: bold;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .payment-options {
-            display: grid;
-            gap: 10px;
-        }
-        
-        .payment-option {
-            background: white;
-            border: 2px solid var(--light);
-            border-radius: 10px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .payment-option:hover {
-            border-color: var(--whatsapp);
-            background: #f0fff4;
-        }
-        
-        .payment-option.selected {
-            border-color: var(--whatsapp);
-            background: #f0fff4;
-            box-shadow: 0 2px 10px rgba(37, 211, 102, 0.2);
-        }
-        
-        .payment-option input[type="radio"] {
-            width: auto;
-            margin: 0;
-        }
-        
-        .payment-info {
-            flex: 1;
-        }
-        
-        .payment-name {
-            font-weight: bold;
-            color: var(--primary);
-            margin-bottom: 3px;
-        }
-        
-        .payment-description {
-            font-size: 0.85em;
-            color: var(--dark);
-        }
-        
-        .payment-icon {
-            font-size: 1.5em;
-        }
-        
-        .mercadopago { color: var(--mercadopago); }
-        .transfer { color: var(--transfer); }
-        
-        .payment-details {
-            background: #e8f5e8;
-            border: 1px solid var(--transfer);
-            border-radius: 8px;
-            padding: 12px;
-            margin-top: 10px;
-            display: none;
-            font-size: 0.9em;
-        }
-        
-        .payment-details.show {
-            display: block;
-        }
-        
-        .alias-info {
-            background: #fff;
-            border: 2px dashed var(--transfer);
-            border-radius: 8px;
-            padding: 10px;
-            text-align: center;
-            font-family: monospace;
-            font-weight: bold;
-            color: var(--transfer);
-            margin: 8px 0;
-        }
-        
-        .form-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            display: none;
-        }
-        
-        .form-overlay.active { display: block; }
-        
-        @media (max-width: 480px) {
-            .container { margin: 0; }
-            .sector-grid { grid-template-columns: repeat(3, 1fr); }
-            .customer-form { 
-                max-width: 95vw; 
-                max-height: 90vh;
-                padding: 15px;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>La Peruana SRL | Pedidos por WhatsApp en Paraná</title>
+
+<!-- ===================== SEO ===================== -->
+<meta name="description" content="Rotisería, panadería, pastelería, carnicería, fiambrería, almacén y bebidas. Armá tu pedido en el celular y confirmalo por WhatsApp. Envíos en Paraná, Entre Ríos.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#B70E09">
+<link rel="canonical" href="https://andresgamarci.github.io/la-peruana-pedidos/">
+
+<!-- Vista previa al compartir el link por WhatsApp / Facebook / Instagram -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_AR">
+<meta property="og:site_name" content="La Peruana">
+<meta property="og:title" content="La Peruana | En el corazón de Paraná">
+<meta property="og:description" content="Elegí tus productos y confirmá el pedido por WhatsApp. Panadería, rotisería, fiambrería, verdulería, carnicería y almacén.">
+<meta property="og:url" content="https://andresgamarci.github.io/la-peruana-pedidos/">
+<meta property="og:image" content="https://andresgamarci.github.io/la-peruana-pedidos/compartir.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+<!-- Ícono de la pestaña y del acceso directo en el celular -->
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="icono-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="icono-180.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   LA PERUANA — hoja de estilos
+   ============================================================ */
+:root{
+  --rojo:#B70E09;        /* el rojo exacto del fondo del logo */
+  --rojo-osc:#8E0A05;
+  --rojo-tinta:#630600;  /* la sombra de las letras */
+  --rojo-suave:#FCEAE9;
+  --oro:#FBBA19;         /* el dorado de las letras */
+  --oro-claro:#FFE751;
+  --verde:#128C4A;
+  --verde-wa:#25D366;
+  --tinta:#1C1917;
+  --gris:#6E6763;
+  --linea:#E8E2DB;
+  --papel:#FBF8F4;
+  --blanco:#fff;
+  --radio:14px;
+  --sombra:0 1px 2px rgba(28,25,23,.06), 0 6px 20px rgba(28,25,23,.05);
+  --alto-barra:0px; /* lo calcula el JS para el scroll de secciones */
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--papel);
+  color:var(--tinta);
+  font-family:'Inter',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  font-size:16px;
+  line-height:1.45;
+  padding-bottom:calc(84px + env(safe-area-inset-bottom));
+}
+h1,h2,h3{font-family:'Bricolage Grotesque','Inter',sans-serif;font-weight:800;letter-spacing:-.02em;margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+img{display:block;max-width:100%}
+[hidden]{display:none !important}   /* si no está esto, .campo{display:flex} pisa al atributo hidden */
+:focus-visible{outline:3px solid var(--rojo);outline-offset:2px;border-radius:6px}
+.solo-lectores{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- Encabezado ---------- */
+.marca{
+  position:relative;background:var(--rojo);
+  padding:.75rem 1rem .85rem;text-align:center;
+  border-bottom:3px solid var(--oro);
+}
+.marca-logo{display:inline-block}
+.marca-logo img{width:min(190px,48vw);height:auto;margin:0 auto}
+.btn-carrito-top{
+  position:absolute;top:.9rem;right:.9rem;
+  display:inline-flex;align-items:center;gap:.45rem;
+  background:linear-gradient(180deg,var(--oro-claro),var(--oro));
+  color:var(--rojo-tinta);border:none;border-radius:999px;
+  padding:.5rem .8rem;font-weight:700;cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,.28);
+  transition:filter .15s ease, transform .12s ease;
+}
+.btn-carrito-top:hover{filter:brightness(1.07)}
+.btn-carrito-top:active{transform:scale(.97)}
+.btn-carrito-top:focus-visible{outline-color:#fff}
+.btn-carrito-top svg{width:19px;height:19px;flex:none}
+.pastilla{
+  background:var(--rojo-osc);color:var(--oro-claro);border-radius:999px;
+  padding:.05rem .5rem;font-size:.82rem;font-weight:700;font-variant-numeric:tabular-nums;
+}
+
+/* ---------- Franja de bienvenida ---------- */
+.bienvenida{
+  background:linear-gradient(180deg,#fff 0%,var(--papel) 100%);
+  border-bottom:1px solid var(--linea);
+  padding:1rem 1rem 1.2rem;
+  text-align:center;
+}
+.bienvenida h1{font-size:clamp(1.35rem,4.6vw,2rem);line-height:1.1}
+.bienvenida h1 em{font-style:normal;color:var(--rojo)}
+.bienvenida p{margin:.45rem auto 0;max-width:44ch;color:var(--gris);font-size:.95rem}
+.tiras{display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;margin-top:.9rem;overflow-x:auto;scrollbar-width:none}
+.tiras::-webkit-scrollbar{display:none}
+@media (max-width:520px){
+  .tiras{flex-wrap:nowrap;justify-content:flex-start;padding-inline:1rem}
+  .bienvenida{padding-inline:0}
+  .bienvenida h1,.bienvenida p{padding-inline:1rem}
+}
+.tira{
+  background:var(--blanco);border:1px solid var(--linea);border-radius:999px;
+  padding:.3rem .75rem;font-size:.82rem;color:var(--gris);white-space:nowrap;
+}
+
+/* ---------- Buscador + categorías (pegados arriba) ---------- */
+.barra-filtros{
+  position:sticky;top:0;z-index:40;
+  background:rgba(251,248,244,.94);
+  backdrop-filter:saturate(160%) blur(10px);
+  border-bottom:1px solid var(--linea);
+}
+.barra-filtros-int{max-width:1180px;margin:0 auto;padding:.7rem 1rem .1rem}
+.buscador{position:relative;display:flex;align-items:center}
+.buscador svg{position:absolute;left:.85rem;width:19px;height:19px;color:var(--gris);pointer-events:none}
+#inpBuscar{
+  width:100%;border:1.5px solid var(--linea);background:var(--blanco);
+  border-radius:12px;padding:.75rem 2.6rem;font-size:1rem;
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+#inpBuscar::placeholder{color:#A8A19C}
+#inpBuscar:focus{outline:none;border-color:var(--rojo);box-shadow:0 0 0 4px rgba(214,39,43,.12)}
+.btn-limpiar-busq{
+  position:absolute;right:.5rem;border:none;background:#EFEAE4;color:var(--gris);
+  width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:1rem;line-height:1;
+  display:none;align-items:center;justify-content:center;
+}
+.btn-limpiar-busq.visible{display:flex}
+
+.fichas{
+  display:flex;gap:.45rem;overflow-x:auto;padding:.7rem .1rem .75rem;
+  scrollbar-width:none;-ms-overflow-style:none;
+}
+.fichas::-webkit-scrollbar{display:none}
+.ficha{
+  flex:none;border:1.5px solid var(--linea);background:var(--blanco);color:var(--gris);
+  border-radius:999px;padding:.42rem .85rem;font-size:.87rem;font-weight:600;
+  cursor:pointer;white-space:nowrap;transition:all .15s ease;
+}
+.ficha:hover{border-color:#C9C2BA;color:var(--tinta)}
+.ficha[aria-pressed="true"]{background:var(--rojo);border-color:var(--rojo);color:#fff}
+
+/* ---------- Catálogo ---------- */
+main{max-width:1180px;margin:0 auto;padding:1.4rem 1rem 2rem}
+.seccion{margin-bottom:2.4rem;scroll-margin-top:var(--alto-barra)}
+.seccion-cab{display:flex;align-items:baseline;gap:.6rem;margin-bottom:.9rem;padding-bottom:.5rem;border-bottom:2px solid var(--oro)}
+.seccion-cab h2{font-size:1.15rem;text-transform:uppercase;letter-spacing:.01em;color:var(--rojo)}
+.seccion-cab span{font-size:.82rem;color:var(--gris);font-variant-numeric:tabular-nums}
+.grilla{display:grid;grid-template-columns:1fr;gap:.55rem}
+
+.producto{
+  background:var(--blanco);border:1px solid var(--linea);border-radius:12px;
+  padding:.75rem .85rem;display:flex;align-items:center;gap:.9rem;
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+.producto:hover{border-color:#D6CFC6;box-shadow:var(--sombra)}
+.producto.en-carrito{border-color:var(--rojo);box-shadow:0 0 0 1px var(--rojo);background:#FFFDFD}
+.producto-datos{flex:1;min-width:0}
+.producto-nombre{font-size:.95rem;font-weight:500;line-height:1.3;margin-bottom:.15rem}
+.producto-precio{display:flex;align-items:baseline;gap:.45rem;flex-wrap:wrap}
+.producto-precio .valor{
+  font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:1.05rem;
+  font-variant-numeric:tabular-nums;color:var(--rojo-tinta);
+  background:linear-gradient(to top, var(--oro-claro) 0 .42em, transparent .42em);
+  padding:0 .15em;
+}
+.producto-precio .unidad{font-size:.78rem;color:var(--gris)}
+
+.btn-agregar{
+  flex:none;width:96px;border:1.5px solid var(--rojo);background:var(--blanco);color:var(--rojo);
+  border-radius:10px;padding:.5rem;font-weight:700;font-size:.88rem;cursor:pointer;
+  transition:background .15s ease,color .15s ease;
+}
+.btn-agregar:hover{background:var(--rojo);color:#fff}
+.paso{flex:none;width:96px;display:grid;grid-template-columns:32px 1fr 32px;align-items:center;background:var(--rojo);border-radius:10px;overflow:hidden}
+.paso button{border:none;background:transparent;color:#fff;height:34px;font-size:1.2rem;font-weight:700;cursor:pointer;line-height:1}
+.paso button:hover{background:rgba(0,0,0,.14)}
+.paso .cant{text-align:center;color:#fff;font-weight:700;font-variant-numeric:tabular-nums}
+
+.sin-resultados{text-align:center;padding:3rem 1rem;color:var(--gris)}
+.sin-resultados strong{display:block;font-size:1.1rem;color:var(--tinta);margin-bottom:.3rem}
+.sin-resultados button{
+  margin-top:1rem;background:var(--rojo);color:#fff;border:none;
+  border-radius:10px;padding:.6rem 1.1rem;font-weight:700;cursor:pointer;
+}
+
+/* ---------- Barra inferior de pedido ---------- */
+.barra-pedido{
+  position:fixed;left:0;right:0;bottom:0;z-index:45;
+  padding:.7rem 1rem calc(.7rem + env(safe-area-inset-bottom));
+  background:rgba(255,255,255,.96);backdrop-filter:blur(10px);
+  border-top:1px solid var(--linea);
+  transform:translateY(130%);transition:transform .25s cubic-bezier(.4,0,.2,1);
+}
+.barra-pedido.visible{transform:translateY(0)}
+.barra-pedido-int{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:1rem}
+.resumen{flex:1;min-width:0}
+.resumen-items{font-size:.8rem;color:var(--gris)}
+.resumen-total{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:1.25rem;font-variant-numeric:tabular-nums}
+.btn-ver-pedido{
+  background:var(--rojo);color:#fff;border:none;border-radius:12px;
+  padding:.8rem 1.4rem;font-weight:700;font-size:1rem;cursor:pointer;flex:none;
+  transition:background .15s ease,transform .12s ease;
+}
+.btn-ver-pedido:hover{background:var(--rojo-osc)}
+.btn-ver-pedido:active{transform:scale(.97)}
+
+/* ---------- Aviso flotante ---------- */
+.aviso{
+  position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));
+  transform:translate(-50%,14px);z-index:60;
+  background:var(--tinta);color:#fff;border-radius:999px;
+  padding:.6rem 1.1rem;font-size:.88rem;font-weight:500;
+  opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;
+}
+.aviso.visible{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- Pedido (panel) ---------- */
+.fondo-panel{
+  position:fixed;inset:0;z-index:100;background:rgba(28,25,23,.5);
+  display:none;align-items:flex-end;justify-content:center;
+}
+.fondo-panel.abierto{display:flex}
+.panel{
+  background:var(--blanco);width:100%;max-width:560px;
+  max-height:92dvh;display:flex;flex-direction:column;
+  border-radius:20px 20px 0 0;
+  animation:subir .22s cubic-bezier(.4,0,.2,1);
+}
+@keyframes subir{from{transform:translateY(24px);opacity:.6}to{transform:translateY(0);opacity:1}}
+.panel-cab{
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:1.1rem 1.2rem .8rem;border-bottom:1px solid var(--linea);
+}
+.panel-cab h2{font-size:1.2rem}
+.panel-cab p{margin:.15rem 0 0;font-size:.85rem;color:var(--gris)}
+.btn-cerrar{
+  border:none;background:#F2EEE9;color:var(--tinta);width:34px;height:34px;
+  border-radius:50%;font-size:1.2rem;line-height:1;cursor:pointer;flex:none;
+}
+.btn-cerrar:hover{background:#E7E1DA}
+.panel-cuerpo{overflow-y:auto;padding:1rem 1.2rem;flex:1;-webkit-overflow-scrolling:touch}
+
+.linea-item{display:grid;grid-template-columns:1fr auto;gap:.35rem .8rem;padding:.75rem 0;border-bottom:1px solid var(--linea)}
+.linea-nombre{font-size:.92rem;font-weight:500}
+.linea-unit{font-size:.78rem;color:var(--gris);font-variant-numeric:tabular-nums}
+.linea-der{display:flex;align-items:center;gap:.7rem}
+.paso-mini{display:flex;align-items:center;gap:.15rem;border:1.5px solid var(--linea);border-radius:9px;overflow:hidden}
+.paso-mini button{border:none;background:var(--blanco);color:var(--rojo);width:30px;height:30px;font-size:1.1rem;font-weight:700;cursor:pointer;line-height:1}
+.paso-mini button:hover{background:var(--rojo-suave)}
+.paso-mini .cant{min-width:26px;text-align:center;font-weight:700;font-size:.9rem;font-variant-numeric:tabular-nums}
+.linea-sub{min-width:78px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums;font-size:.92rem}
+
+.totales{margin-top:1rem;border-top:2px solid var(--tinta);padding-top:.8rem}
+.fila-total{display:flex;justify-content:space-between;align-items:baseline;font-size:.9rem;color:var(--gris);margin-bottom:.3rem}
+.fila-total.grande{color:var(--tinta);font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:1.3rem;margin-top:.4rem}
+.nota-envio{
+  background:#FFF6E0;border:1px solid #F2D89A;border-radius:10px;
+  padding:.6rem .75rem;margin:.7rem 0 0;font-size:.85rem;color:#6B4A00;line-height:1.4;
+}
+.nota-envio strong{display:block}
+.nota-transfer{
+  background:var(--rojo-suave);border:1px solid #F0B1B5;border-radius:10px;
+  padding:.65rem .75rem;font-size:.85rem;color:#7A1114;line-height:1.45;
+}
+.nota-transfer strong{display:block}
+.nota-transfer b{font-family:'Bricolage Grotesque',sans-serif;letter-spacing:.02em}
+.fila-total .num{font-variant-numeric:tabular-nums}
+.btn-vaciar{
+  background:none;border:none;color:var(--gris);font-size:.85rem;
+  text-decoration:underline;cursor:pointer;padding:.6rem 0;margin-top:.2rem;
+}
+.btn-vaciar:hover{color:var(--rojo)}
+.vacio{text-align:center;padding:2.5rem 1rem;color:var(--gris)}
+.vacio strong{display:block;color:var(--tinta);font-size:1.05rem;margin-bottom:.3rem}
+
+/* ---------- Datos de entrega ---------- */
+.entrega{margin-top:1.5rem;border-top:1px solid var(--linea);padding-top:1.1rem}
+.entrega h3{font-size:1rem;margin-bottom:.15rem}
+.entrega .sub{font-size:.85rem;color:var(--gris);margin:0 0 .9rem}
+.campos{display:grid;gap:.75rem}
+.dos{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.campo{display:flex;flex-direction:column;gap:.3rem}
+.campo label{font-size:.83rem;font-weight:600;color:#494340}
+.campo input,.campo select,.campo textarea{
+  border:1.5px solid var(--linea);border-radius:10px;padding:.65rem .75rem;
+  font-size:1rem;background:var(--blanco);width:100%;
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+.campo textarea{resize:vertical;min-height:62px}
+.campo input:focus,.campo select:focus,.campo textarea:focus{
+  outline:none;border-color:var(--rojo);box-shadow:0 0 0 4px rgba(214,39,43,.12);
+}
+.campo.error input,.campo.error select{border-color:var(--rojo)}
+.campo .msg{font-size:.78rem;color:var(--rojo);display:none}
+.campo.error .msg{display:block}
+.recordar{display:flex;align-items:center;gap:.55rem;font-size:.86rem;color:var(--gris);cursor:pointer}
+.recordar input{width:18px;height:18px;accent-color:var(--rojo);flex:none}
+
+.panel-pie{padding:.9rem 1.2rem calc(1.1rem + env(safe-area-inset-bottom));border-top:1px solid var(--linea);background:var(--blanco)}
+.btn-wa{
+  display:flex;align-items:center;justify-content:center;gap:.6rem;width:100%;
+  background:var(--verde-wa);color:#fff;border:none;border-radius:12px;
+  padding:.9rem;font-weight:700;font-size:1.02rem;text-decoration:none;cursor:pointer;
+  transition:background .15s ease,transform .12s ease;
+}
+.btn-wa:hover{background:#1DB954}
+.btn-wa:active{transform:scale(.99)}
+.btn-wa[aria-disabled="true"]{background:#C9C2BA;pointer-events:none}
+.btn-wa svg{width:21px;height:21px;flex:none}
+.nota-pie{text-align:center;font-size:.78rem;color:var(--gris);margin:.6rem 0 0}
+
+/* ---------- Aviso antes de enviar ---------- */
+.fondo-cartel{
+  position:fixed;inset:0;z-index:120;background:rgba(28,25,23,.62);
+  display:none;align-items:center;justify-content:center;padding:1rem;
+}
+.fondo-cartel.abierto{display:flex}
+.cartel{
+  background:var(--blanco);border-radius:18px;max-width:420px;width:100%;
+  padding:1.6rem 1.3rem 1.3rem;text-align:center;
+  box-shadow:0 12px 40px rgba(0,0,0,.3);animation:aparecer .18s cubic-bezier(.4,0,.2,1);
+}
+@keyframes aparecer{from{transform:scale(.94);opacity:0}to{transform:scale(1);opacity:1}}
+.cartel-icono{font-size:2.4rem;line-height:1;margin-bottom:.5rem}
+.cartel h2{font-size:1.15rem;margin-bottom:.6rem}
+.cartel p{margin:0 0 .6rem;font-size:.95rem;color:#494340;line-height:1.5}
+.cartel p strong{color:var(--rojo)}
+.cartel-chico{font-size:.83rem !important;color:var(--gris) !important}
+.cartel-botones{display:grid;gap:.55rem;margin-top:1.1rem}
+.btn-volver{
+  background:var(--blanco);color:var(--gris);border:1.5px solid var(--linea);
+  border-radius:12px;padding:.75rem;font-weight:700;font-size:.95rem;cursor:pointer;
+}
+.btn-volver:hover{background:var(--papel);color:var(--tinta)}
+
+/* ---------- Pie ---------- */
+footer{border-top:1px solid var(--linea);background:var(--blanco);padding:1.6rem 1rem;text-align:center}
+footer p{margin:.25rem 0;font-size:.86rem;color:var(--gris)}
+footer a{color:var(--rojo);text-decoration:none;font-weight:600}
+footer a:hover{text-decoration:underline}
+
+/* ---------- Pantallas grandes ---------- */
+@media (min-width:640px){
+  .grilla{grid-template-columns:repeat(2,1fr);gap:.7rem}
+  .marca-logo img{width:210px}
+  .btn-carrito-top{top:50%;transform:translateY(-50%);right:2rem}
+  .btn-carrito-top:active{transform:translateY(-50%) scale(.97)}
+  .fondo-panel{align-items:center}
+  .panel{border-radius:20px;max-height:88dvh}
+}
+@media (max-width:400px){
+  .dos{grid-template-columns:1fr}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important;transition-duration:.01ms !important}
+}
+</style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="status">🟢 Online</div>
-            <h1>
-                <i class="fab fa-whatsapp"></i>
-                La Peruana SRL
-            </h1>
-            <div style="opacity: 0.9; font-size: 0.9em;">Sistema de Pedidos Automático</div>
-        </div>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Welcome -->
-            <div class="welcome-card">
-                <h2>🛒 Haz tu Pedido por WhatsApp</h2>
-                <p>Selecciona productos y envía automáticamente tu pedido. ¡Sin llamadas, sin esperas!</p>
-            </div>
+<!-- ===================== ENCABEZADO ===================== -->
+<header class="marca">
+  <a class="marca-logo" href="#" aria-label="La Peruana, inicio">
+    <!-- Si por lo que sea falta el .webp, se muestra el .jpg. El aviso va acá y no en el
+         script del final porque la imagen puede fallar antes de que el script arranque. -->
+    <img src="logo-la-peruana.webp" alt="La Peruana — En el corazón de Paraná"
+         width="380" height="313" fetchpriority="high"
+         onerror="this.onerror=null;this.src='logo-la-peruana.jpg';">
+  </a>
+  <button class="btn-carrito-top" id="btnCarritoTop" aria-label="Ver mi pedido">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path fill="currentColor" d="M7 20a2 2 0 110-4 2 2 0 010 4zm10 0a2 2 0 110-4 2 2 0 010 4zM7.16 17h9.69c.87 0 1.64-.56 1.89-1.38l2.22-7.06A1 1 0 0020 7H6.21l-.94-2.36A1 1 0 004.34 4H2a1 1 0 100 2h1.34l3.6 9.36-1.35 2.44A1 1 0 006 19h13a1 1 0 100-2H7.42l.74-1.35z"/></svg>
+    <span class="pastilla"><span id="topCant">0</span> · <span id="topMonto">$0</span></span>
+  </button>
+</header>
 
-            <!-- Sectors -->
-            <div class="sector-grid">
-                <div class="sector-btn" onclick="showSector('rotiseria')" id="btn-rotiseria">
-                    <i class="fas fa-utensils" style="color: #ff6b35;"></i>
-                    <div class="name">Rotisería</div>
-                </div>
-                <div class="sector-btn" onclick="showSector('panaderia')" id="btn-panaderia">
-                    <i class="fas fa-bread-slice" style="color: #f39c12;"></i>
-                    <div class="name">Panadería</div>
-                </div>
-                <div class="sector-btn" onclick="showSector('pasteleria')" id="btn-pasteleria">
-                    <i class="fas fa-birthday-cake" style="color: #e91e63;"></i>
-                    <div class="name">Pastelería</div>
-                </div>
-                <div class="sector-btn" onclick="showSector('carniceria')" id="btn-carniceria">
-                    <i class="fas fa-drumstick-bite" style="color: #e74c3c;"></i>
-                    <div class="name">Carnicería</div>
-		</div>
-		<div class="sector-btn" onclick="showSector('verduleria')" id="btn-verduleria">
-                    <i class="fas fa-carrot" style="color: #ff6b35;"></i>
-                    <div class="name">Verdulería</div>
-                </div>
-                <div class="sector-btn" onclick="showSector('fiambreria')" id="btn-fiambreria">
-                    <i class="fas fa-cheese" style="color: #ffc107;"></i>
-                    <div class="name">Fiambrería</div>
-                </div>
-                <div class="sector-btn" onclick="showSector('almacen')" id="btn-almacen">
-                    <i class="fas fa-boxes" style="color: #6c757d;"></i>
-                    <div class="name">Almacén</div>
-                </div>
-                <div class="sector-btn" onclick="showSector('bebidas')" id="btn-bebidas">
-                    <i class="fas fa-glass-cheers" style="color: #17a2b8;"></i>
-                    <div class="name">Bebidas</div>
-                </div>
-            </div>
+<!-- ===================== BIENVENIDA ===================== -->
+<section class="bienvenida">
+  <h1>Tu pedido, <em>en un toque</em></h1>
+  <p>Armá el pedido acá y te lo mandamos escrito por WhatsApp. Sin llamadas ni esperas.</p>
+  <div class="tiras">
+    <span class="tira">🍗 Rotisería y panadería propias</span>
+    <span class="tira">🕒 Elegís la franja horaria</span>
+    <span class="tira">💬 Confirmás por WhatsApp</span>
+    <span class="tira">🛵 El envío se cotiza aparte</span>
+  </div>
+</section>
 
-            <!-- ROTISERÍA -->
-            <div id="rotiseria" class="products-section">
-                <h3 class="section-title">
-                    <i class="fas fa-utensils" style="color: #ff6b35;"></i>
-                    Rotisería
-                </h3>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Torrejas</div>
-                        <div class="product-price">$471</div>
-                        <div class="product-unit">por unidad</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('torrejas', -1)">-</button>
-                        <span class="qty-display" id="qty-torrejas">0</span>
-                        <button class="qty-btn" onclick="changeQty('torrejas', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Sándwich Simples</div>
-                        <div class="product-price">$1.100</div>
-                        <div class="product-unit">por unidad</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('sandwich-simples', -1)">-</button>
-                        <span class="qty-display" id="qty-sandwich-simples">0</span>
-                        <button class="qty-btn" onclick="changeQty('sandwich-simples', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Sandwich Triples</div>
-                        <div class="product-price">$1.844</div>
-                        <div class="product-unit">por unidad</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('sandwich-triples', -1)">-</button>
-                        <span class="qty-display" id="qty-sandwich-triples">0</span>
-                        <button class="qty-btn" onclick="changeQty('sandwich-triples', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Tortilla</div>
-                        <div class="product-price">$4.782</div>
-                        <div class="product-unit">por unidad</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('tortilla', -1)">-</button>
-                        <span class="qty-display" id="qty-tortilla">0</span>
-                        <button class="qty-btn" onclick="changeQty('tortilla', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Hamburguesa Cheddar c/ papas</div>
-                        <div class="product-price">$9.680</div>
-                        <div class="product-unit">por unidad</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('hamburger-cheddar', -1)">-</button>
-                        <span class="qty-display" id="qty-hamburger-cheddar">0</span>
-                        <button class="qty-btn" onclick="changeQty('hamburger-cheddar', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Hamburguesa LP c/ papas</div>
-                        <div class="product-price">$10.785</div>
-                        <div class="product-unit">por unidad</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('hamburger-lp', -1)">-</button>
-                        <span class="qty-display" id="qty-hamburger-lp">0</span>
-                        <button class="qty-btn" onclick="changeQty('hamburger-lp', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Patamuslo</div>
-                        <div class="product-price">$6000</div>
-                        <div class="product-unit">por unidad</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('patamuslo', -1)">-</button>
-                        <span class="qty-display" id="qty-patamuslo">0</span>
-                        <button class="qty-btn" onclick="changeQty('patamuslo', 1)">+</button>
-                    </div>
-                </div>
-            </div>
+<!-- ===================== BUSCADOR Y CATEGORÍAS ===================== -->
+<div class="barra-filtros" id="barraFiltros">
+  <div class="barra-filtros-int">
+    <div class="buscador">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <label class="solo-lectores" for="inpBuscar">Buscar productos</label>
+      <input id="inpBuscar" type="search" inputmode="search" autocomplete="off" placeholder="Buscar: medialunas, milanesa, yerba…">
+      <button class="btn-limpiar-busq" id="btnLimpiarBusq" aria-label="Borrar la búsqueda">&times;</button>
+    </div>
+    <nav class="fichas" id="fichas" aria-label="Categorías"></nav>
+  </div>
+</div>
 
-            <!-- PANADERÍA -->
-            <div id="panaderia" class="products-section">
-                <h3 class="section-title">
-                    <i class="fas fa-bread-slice" style="color: #f39c12;"></i>
-                    Panadería
-                </h3>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Facturas</div>
-                        <div class="product-price">$735</div>
-                        <div class="product-unit">por unidad</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('facturas', -1)">-</button>
-                        <span class="qty-display" id="qty-facturas">0</span>
-                        <button class="qty-btn" onclick="changeQty('facturas', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Especiales</div>
-                        <div class="product-price">$614</div>
-                        <div class="product-unit">por unidad</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('especiales', -1)">-</button>
-                        <span class="qty-display" id="qty-especiales">0</span>
-                        <button class="qty-btn" onclick="changeQty('especiales', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Francés</div>
-                        <div class="product-price">$222</div>
-                        <div class="product-unit">por unidad</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('frances', -1)">-</button>
-                        <span class="qty-display" id="qty-frances">0</span>
-                        <button class="qty-btn" onclick="changeQty('frances', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Suizos</div>
-                        <div class="product-price">$133</div>
-                        <div class="product-unit">por unidad</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('suizos', -1)">-</button>
-                        <span class="qty-display" id="qty-suizos">0</span>
-                        <button class="qty-btn" onclick="changeQty('suizos', 1)">+</button>
-                    </div>
-                </div>
-            </div>
+<!-- ===================== CATÁLOGO ===================== -->
+<main id="catalogo"></main>
 
-            <!-- PASTELERÍA -->
-            <div id="pasteleria" class="products-section">
-                <h3 class="section-title">
-                    <i class="fas fa-birthday-cake" style="color: #e91e63;"></i>
-                    Pastelería
-                </h3>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Cheese cake</div>
-                        <div class="product-price">$6.362</div>
-                        <div class="product-unit">por unidad</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('cheese-cake', -1)">-</button>
-                        <span class="qty-display" id="qty-cheese-cake">0</span>
-                        <button class="qty-btn" onclick="changeQty('cheese-cake', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Mini bombón</div>
-                        <div class="product-price">$1.019</div>
-                        <div class="product-unit">por unidad</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('mini-bombon', -1)">-</button>
-                        <span class="qty-display" id="qty-mini-bombon">0</span>
-                        <button class="qty-btn" onclick="changeQty('mini-bombon', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Mini lemon pie</div>
-                        <div class="product-price">$1.019</div>
-                        <div class="product-unit">por unidad</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('mini-lemon-pie', -1)">-</button>
-                        <span class="qty-display" id="qty-mini-lemon-pie">0</span>
-                        <button class="qty-btn" onclick="changeQty('mini-lemon-pie', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Mini frutal</div>
-                        <div class="product-price">$1.551</div>
-                        <div class="product-unit">por unidad</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('mini-frutal', -1)">-</button>
-                        <span class="qty-display" id="qty-mini-frutal">0</span>
-                        <button class="qty-btn" onclick="changeQty('mini-frutal', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Lingote de durazno o frutilla</div>
-                        <div class="product-price">$2.038</div>
-                        <div class="product-unit">por unidad</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('lingote', -1)">-</button>
-                        <span class="qty-display" id="qty-lingote">0</span>
-                        <button class="qty-btn" onclick="changeQty('lingote', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Red velvet</div>
-                        <div class="product-price">$1.698</div>
-                        <div class="product-unit">por unidad</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('red-velvet', -1)">-</button>
-                        <span class="qty-display" id="qty-red-velvet">0</span>
-                        <button class="qty-btn" onclick="changeQty('red-velvet', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Tiramisú</div>
-                        <div class="product-price">$3.057</div>
-                        <div class="product-unit">por unidad</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('tiramisu', -1)">-</button>
-                        <span class="qty-display" id="qty-tiramisu">0</span>
-                        <button class="qty-btn" onclick="changeQty('tiramisu', 1)">+</button>
-                    </div>
-                </div>
-            </div>
+<!-- ===================== PIE ===================== -->
+<footer>
+  <p><strong>La Peruana SRL</strong> · En el corazón de Paraná</p>
+  <p>Av. Ramírez 2134 · Paraná, Entre Ríos ·
+     <a href="https://www.google.com/maps/search/?api=1&amp;query=Av.+Ram%C3%ADrez+2134+Paran%C3%A1+Entre+R%C3%ADos" target="_blank" rel="noopener">Ver en el mapa</a></p>
+  <p>Pedidos por WhatsApp: <a id="waPie" href="#" target="_blank" rel="noopener">Escribinos</a></p>
+  <p style="font-size:.78rem;opacity:.8">Los precios pueden cambiar sin previo aviso. Confirmamos el total al recibir tu pedido.</p>
+</footer>
 
-            <!-- CARNICERÍA -->
-            <div id="carniceria" class="products-section">
-                <h3 class="section-title">
-                    <i class="fas fa-drumstick-bite" style="color: #e74c3c;"></i>
-                    Carnicería
-                </h3>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Milanesa de Carne</div>
-                        <div class="product-price">$13.500</div>
-                        <div class="product-unit">por kg</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('milanesa-carne', -1)">-</button>
-                        <span class="qty-display" id="qty-milanesa-carne">0</span>
-                        <button class="qty-btn" onclick="changeQty('milanesa-carne', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Milanesa de Pollo</div>
-                        <div class="product-price">$12.000</div>
-                        <div class="product-unit">por kg</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('milanesa-pollo', -1)">-</button>
-                        <span class="qty-display" id="qty-milanesa-pollo">0</span>
-                        <button class="qty-btn" onclick="changeQty('milanesa-pollo', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Filet de Pechuga</div>
-                        <div class="product-price">$15.500</div>
-                        <div class="product-unit">por kg</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('filet-pechuga', -1)">-</button>
-                        <span class="qty-display" id="qty-filet-pechuga">0</span>
-                        <button class="qty-btn" onclick="changeQty('filet-pechuga', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Costeletas Cerdo</div>
-                        <div class="product-price">$8.400</div>
-                        <div class="product-unit">por kg</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('costeletas-cerdo', -1)">-</button>
-                        <span class="qty-display" id="qty-costeletas-cerdo">0</span>
-                        <button class="qty-btn" onclick="changeQty('costeletas-cerdo', 1)">+</button>
-                    </div>
-                </div>
-            </div>
-	    <!-- VERDULERÍA -->
-            <div id="verduleria" class="products-section">
-                <h3 class="section-title">
-                    <i class="fas fa-utensils" style="color: #ff6b35;"></i>
-                    Verdulería
-                </h3>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Zanahorias</div>
-                        <div class="product-price">$471</div>
-                        <div class="product-unit">por kg</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('zanahorias', -1)">-</button>
-                        <span class="qty-display" id="qty-zanahorias">0</span>
-                        <button class="qty-btn" onclick="changeQty('zanahorias', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Tomates redondos</div>
-                        <div class="product-price">$1.100</div>
-                        <div class="product-unit">por kg</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('tomate-redondo', -1)">-</button>
-                        <span class="qty-display" id="qty-tomates-redondos">0</span>
-                        <button class="qty-btn" onclick="changeQty('tomates-redondos', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Manzanas rojas</div>
-                        <div class="product-price">$4.782</div>
-                        <div class="product-unit">por kg</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('manzanas-rojas', -1)">-</button>
-                        <span class="qty-display" id="qty-manzanas-rojas">0</span>
-                        <button class="qty-btn" onclick="changeQty('manzanas-rojas', 1)">+</button>
-                    </div>
-		</div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Bananas</div>
-                        <div class="product-price">$10.785</div>
-                        <div class="product-unit">por kg</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('bananas', -1)">-</button>
-                        <span class="qty-display" id="qty-bananas">0</span>
-                        <button class="qty-btn" onclick="changeQty('bananas', 1)">+</button>
-                    </div>
-                </div>
-            </div>
+<!-- ===================== BARRA INFERIOR ===================== -->
+<div class="barra-pedido" id="barraPedido">
+  <div class="barra-pedido-int">
+    <div class="resumen">
+      <div class="resumen-items"><span id="barraItems">0 productos</span></div>
+      <div class="resumen-total" id="barraTotal">$0</div>
+    </div>
+    <button class="btn-ver-pedido" id="btnVerPedido">Ver mi pedido</button>
+  </div>
+</div>
 
-            <!-- FIAMBRERÍA -->
-            <div id="fiambreria" class="products-section">
-                <h3 class="section-title">
-                    <i class="fas fa-cheese" style="color: #ffc107;"></i>
-                    Fiambrería
-                </h3>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Bandeja Picada de fiambres surtidos x 800 grs</div>
-                        <div class="product-price">$19.600</div>
-                        <div class="product-unit">por bandeja</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('picada-fiambres', -1)">-</button>
-                        <span class="qty-display" id="qty-picada-fiambres">0</span>
-                        <button class="qty-btn" onclick="changeQty('picada-fiambres', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Bandeja picada de quesos surtidos x 700 grs</div>
-                        <div class="product-price">$14.900</div>
-                        <div class="product-unit">por bandeja</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('picada-quesos', -1)">-</button>
-                        <span class="qty-display" id="qty-picada-quesos">0</span>
-                        <button class="qty-btn" onclick="changeQty('picada-quesos', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Bandeja Picada Lario x 700 grs</div>
-                        <div class="product-price">$15.680</div>
-                        <div class="product-unit">por bandeja</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('picada-lario', -1)">-</button>
-                        <span class="qty-display" id="qty-picada-lario">0</span>
-                        <button class="qty-btn" onclick="changeQty('picada-lario', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Bandeja Picada Paladini x 700 grs</div>
-                        <div class="product-price">$17.641</div>
-                        <div class="product-unit">por bandeja</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('picada-paladini', -1)">-</button>
-                        <span class="qty-display" id="qty-picada-paladini">0</span>
-                        <button class="qty-btn" onclick="changeQty('picada-paladini', 1)">+</button>
-                    </div>
-                </div>
-            </div>
+<div class="aviso" id="aviso" role="status" aria-live="polite"></div>
 
-            <!-- ALMACÉN -->
-            <div id="almacen" class="products-section">
-                <h3 class="section-title">
-                    <i class="fas fa-boxes" style="color: #6c757d;"></i>
-                    Almacén
-                </h3>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Paté de Foie Molto</div>
-                        <div class="product-price">$957</div>
-                        <div class="product-unit">por unidad</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('pate-foie', -1)">-</button>
-                        <span class="qty-display" id="qty-pate-foie">0</span>
-                        <button class="qty-btn" onclick="changeQty('pate-foie', 1)">+</button>
-                    </div>
-                </div>
-            </div>
+<!-- ===================== AVISO ANTES DE ENVIAR ===================== -->
+<div class="fondo-cartel" id="fondoCartel">
+  <div class="cartel" role="dialog" aria-modal="true" aria-labelledby="tituloCartel" aria-describedby="textoCartel">
+    <div class="cartel-icono" aria-hidden="true">🛑</div>
+    <h2 id="tituloCartel">Antes de enviar tu pedido</h2>
+    <p id="textoCartel">
+      <strong>No transfieras ni pagues nada todavía.</strong>
+      Esperá a que te confirmemos el pedido por WhatsApp. Recién ahí te decimos
+      el total final, cuánto sale el envío y cómo abonar.
+    </p>
+    <p class="cartel-chico">Nunca te vamos a pedir un pago por fuera de ese chat.</p>
+    <div class="cartel-botones">
+      <button class="btn-volver" type="button" id="btnVolverCartel">Volver al pedido</button>
+      <a class="btn-wa" id="btnIrWhatsApp" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.65-2.05-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.2-.24-.58-.48-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.01-1.04 2.47s1.07 2.87 1.22 3.07c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.72 2-1.41.25-.69.25-1.28.17-1.41-.07-.13-.27-.2-.57-.35zM12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.87 9.87 0 004.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0012.04 2z"/></svg>
+        Entendido, enviar pedido
+      </a>
+    </div>
+  </div>
+</div>
 
-            <!-- BEBIDAS -->
-            <div id="bebidas" class="products-section">
-                <h3 class="section-title">
-                    <i class="fas fa-glass-cheers" style="color: #17a2b8;"></i>
-                    Bebidas
-                </h3>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Coca Cola 1.5L</div>
-                        <div class="product-price">$3.810</div>
-                        <div class="product-unit">por botella</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('coca-15', -1)">-</button>
-                        <span class="qty-display" id="qty-coca-15">0</span>
-                        <button class="qty-btn" onclick="changeQty('coca-15', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Coca Cola 2.5L</div>
-                        <div class="product-price">$4.999</div>
-                        <div class="product-unit">por botella</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('coca-25', -1)">-</button>
-                        <span class="qty-display" id="qty-coca-25">0</span>
-                        <button class="qty-btn" onclick="changeQty('coca-25', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Agua saborizadas Levité x1.5L</div>
-                        <div class="product-price">$1.460</div>
-                        <div class="product-unit">por botella</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('levite', -1)">-</button>
-                        <span class="qty-display" id="qty-levite">0</span>
-                        <button class="qty-btn" onclick="changeQty('levite', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Pritty Limón 2.25L</div>
-                        <div class="product-price">$1.910</div>
-                        <div class="product-unit">por botella</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('pritty-limon', -1)">-</button>
-                        <span class="qty-display" id="qty-pritty-limon">0</span>
-                        <button class="qty-btn" onclick="changeQty('pritty-limon', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Pepsi 3L</div>
-                        <div class="product-price">$2.987</div>
-                        <div class="product-unit">por botella</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('pepsi-3l', -1)">-</button>
-                        <span class="qty-display" id="qty-pepsi-3l">0</span>
-                        <button class="qty-btn" onclick="changeQty('pepsi-3l', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Vino Otro Loco Más</div>
-                        <div class="product-price">$4.736</div>
-                        <div class="product-unit">por botella</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('vino-otro-loco', -1)">-</button>
-                        <span class="qty-display" id="qty-vino-otro-loco">0</span>
-                        <button class="qty-btn" onclick="changeQty('vino-otro-loco', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Vino Finjamos Demencia</div>
-                        <div class="product-price">$4.784</div>
-                        <div class="product-unit">por botella</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('vino-finjamos', -1)">-</button>
-                        <span class="qty-display" id="qty-vino-finjamos">0</span>
-                        <button class="qty-btn" onclick="changeQty('vino-finjamos', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Vino Hormiga Negra</div>
-                        <div class="product-price">$3.394</div>
-                        <div class="product-unit">por botella</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('vino-hormiga', -1)">-</button>
-                        <span class="qty-display" id="qty-vino-hormiga">0</span>
-                        <button class="qty-btn" onclick="changeQty('vino-hormiga', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Cerveza Corona 330CC</div>
-                        <div class="product-price">$3.230</div>
-                        <div class="product-unit">por botella</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('cerveza-corona', -1)">-</button>
-                        <span class="qty-display" id="qty-cerveza-corona">0</span>
-                        <button class="qty-btn" onclick="changeQty('cerveza-corona', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Cerveza en lata Quilmes 473CC</div>
-                        <div class="product-price">$1.258</div>
-                        <div class="product-unit">por lata</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('cerveza-quilmes', -1)">-</button>
-                        <span class="qty-display" id="qty-cerveza-quilmes">0</span>
-                        <button class="qty-btn" onclick="changeQty('cerveza-quilmes', 1)">+</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">Cerveza en lata Budweiser 473CC</div>
-                        <div class="product-price">$1.545</div>
-                        <div class="product-unit">por lata</div>
-                    </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('cerveza-budweiser', -1)">-</button>
-                        <span class="qty-display" id="qty-cerveza-budweiser">0</span>
-                        <button class="qty-btn" onclick="changeQty('cerveza-budweiser', 1)">+</button>
-                    </div>
-                </div>
-            </div>
-
-        </div> <!-- fin de main-content -->
-
-    </div> <!-- fin de container -->
-
-    <!-- 🛒 CART SUMMARY INDEPENDIENTE -->
-    <div id="cart-summary" class="cart-summary">
-        <div class="cart-total" id="cart-total">Total: $0.00</div>
-        <button class="btn-clear" onclick="clearCart()">🗑️ Limpiar Carrito</button>
-        <button class="btn-whatsapp" onclick="showCustomerForm()">
-            <i class="fab fa-whatsapp"></i>
-            Enviar Pedido por WhatsApp
-        </button>
+<!-- ===================== PANEL DE PEDIDO ===================== -->
+<div class="fondo-panel" id="fondoPanel">
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="tituloPanel">
+    <div class="panel-cab">
+      <div>
+        <h2 id="tituloPanel">Tu pedido</h2>
+        <p>Revisalo y completá los datos de entrega.</p>
+      </div>
+      <button class="btn-cerrar" id="btnCerrarPanel" aria-label="Cerrar el pedido">&times;</button>
     </div>
 
-    <!-- Overlay para formulario -->
-    <div id="form-overlay" class="form-overlay" onclick="hideCustomerForm()"></div>
+    <div class="panel-cuerpo">
+      <div id="listaPedido"></div>
 
-    <!-- 📋 FORMULARIO DE CLIENTE INDEPENDIENTE -->
-    <div id="customer-form" class="customer-form">
-        <h3 style="margin-bottom: 15px; color: var(--primary);">📋 Completa tus datos:</h3>
-        
-        <div class="form-group">
-            <label>👤 Nombre completo:</label>
-            <input type="text" id="customer-name" placeholder="Juan Pérez" required>
-        </div>
-        
-        <div class="form-group">
-            <label>📱 Teléfono:</label>
-            <input type="tel" id="customer-phone" placeholder="0981123456" required>
-        </div>
-        
-        <div class="form-group">
-            <label>📍 Dirección de entrega:</label>
-            <input type="text" id="customer-address" placeholder="Av. Principal 123, Asunción" required>
-        </div>
+      <div id="bloqueTotales" class="totales" hidden>
+        <div class="fila-total"><span>Subtotal</span><span class="num" id="subtotal">$0</span></div>
+        <div class="fila-total" id="filaEnvio" hidden><span id="rotuloEnvio">Envío</span><span class="num" id="montoEnvio">$0</span></div>
+        <div class="fila-total grande"><span>Total</span><span class="num" id="total">$0</span></div>
+        <p class="nota-envio">
+          <strong>El envío no está incluido en este total.</strong>
+          Te pasamos cuánto sale por WhatsApp cuando confirmemos el pedido.
+        </p>
+        <button class="btn-vaciar" id="btnVaciar">Vaciar el pedido</button>
+      </div>
 
-        <!-- NUEVA SECCIÓN: MEDIOS DE PAGO -->
-        <div class="payment-section">
-            <div class="payment-title">
-                <i class="fas fa-credit-card"></i>
-                Selecciona tu medio de pago:
+      <div class="entrega" id="entrega" hidden>
+        <h3>Datos de entrega</h3>
+        <p class="sub">Los usamos solo para llevarte el pedido.</p>
+        <div class="campos">
+          <div class="campo" id="cNombre">
+            <label for="inpNombre">Nombre y apellido</label>
+            <input id="inpNombre" type="text" autocomplete="name" placeholder="Juan Pérez">
+            <span class="msg">Escribí tu nombre para que sepamos quién pide.</span>
+          </div>
+          <div class="dos">
+            <div class="campo" id="cTelefono">
+              <label for="inpTelefono">Teléfono</label>
+              <input id="inpTelefono" type="tel" inputmode="tel" autocomplete="tel" placeholder="343 555-1212">
+              <span class="msg">Necesitamos al menos 8 números.</span>
             </div>
-            
-            <div class="payment-options">
-                <!-- Mercado Pago -->
-                <div class="payment-option" onclick="selectPayment('mercadopago')">
-                    <input type="radio" name="payment" value="mercadopago" id="payment-mercadopago">
-                    <i class="fas fa-mobile-alt payment-icon mercadopago"></i>
-                    <div class="payment-info">
-                        <div class="payment-name">Mercado Pago</div>
-                        <div class="payment-description">Pago digital seguro y rápido</div>
-                    </div>
-                </div>
-                
-                <!-- Transferencia -->
-                <div class="payment-option" onclick="selectPayment('transferencia')">
-                    <input type="radio" name="payment" value="transferencia" id="payment-transferencia">
-                    <i class="fas fa-university payment-icon transfer"></i>
-                    <div class="payment-info">
-                        <div class="payment-name">Transferencia Bancaria</div>
-                        <div class="payment-description">Transferí a nuestro alias</div>
-                    </div>
-                </div>
-                
-                <!-- Efectivo -->
-                <div class="payment-option" onclick="selectPayment('efectivo')">
-                    <input type="radio" name="payment" value="efectivo" id="payment-efectivo">
-                    <i class="fas fa-money-bill-wave payment-icon" style="color: #28a745;"></i>
-                    <div class="payment-info">
-                        <div class="payment-name">Efectivo</div>
-                        <div class="payment-description">Pago en efectivo al recibir</div>
-                    </div>
-                </div>
+            <div class="campo" id="cFranja">
+              <label for="selFranja">¿Cuándo lo querés?</label>
+              <select id="selFranja">
+                <option value="">Elegí un horario</option>
+                <option>Lo antes posible (30-60 min)</option>
+                <option>12:00 - 13:00</option>
+                <option>13:00 - 14:00</option>
+                <option>14:00 - 15:00</option>
+                <option>19:00 - 20:00</option>
+                <option>20:00 - 21:00</option>
+              </select>
+              <span class="msg">Elegí una franja horaria.</span>
             </div>
-            
-            <!-- Detalles de transferencia -->
-            <div id="transfer-details" class="payment-details">
-                <div style="text-align: center; margin-bottom: 10px;">
-                    <i class="fas fa-university transfer" style="font-size: 1.5em;"></i>
-                </div>
-                <strong>📋 Datos para transferencia:</strong>
-                <div class="alias-info">
-                    laperuanasrl
-                </div>
-                <div style="font-size: 0.85em; text-align: center; color: var(--dark);">
-                    💡 <strong>Importante:</strong> Enviá el comprobante junto con tu pedido
-                </div>
-            </div>
+          </div>
+          <div class="campo" id="cDireccion">
+            <label for="inpDireccion">Dirección de entrega</label>
+            <input id="inpDireccion" type="text" autocomplete="street-address" placeholder="Calle 123, piso/depto, barrio">
+            <span class="msg">Poné calle, número y barrio.</span>
+          </div>
+          <div class="campo" id="cPago">
+            <label for="selPago">¿Cómo abonás?</label>
+            <select id="selPago">
+              <option value="">Elegí una forma de pago</option>
+              <option>Efectivo</option>
+              <option>Transferencia</option>
+              <option>Mercado Pago</option>
+            </select>
+            <span class="msg">Elegí cómo vas a pagar.</span>
+          </div>
+          <div class="nota-transfer" id="notaTransfer" hidden>
+            <strong>No transfieras todavía.</strong>
+            Cuando confirmemos el pedido por WhatsApp te pasamos el total final con el envío
+            y los datos para pagar.
+            <span id="aliasTransfer" hidden>Alias: <b>laperuanasrl</b></span>
+          </div>
+          <div class="campo" id="cVuelto" hidden>
+            <label for="inpVuelto">¿Con cuánto abonás? (para llevarte el vuelto)</label>
+            <input id="inpVuelto" type="text" inputmode="numeric" placeholder="Ej: 20000">
+          </div>
+          <div class="campo">
+            <label for="inpNotas">Aclaraciones (opcional)</label>
+            <textarea id="inpNotas" rows="2" placeholder="Timbre roto, llamar al llegar, casa de reja verde…"></textarea>
+          </div>
+          <label class="recordar">
+            <input type="checkbox" id="chkRecordar" checked>
+            Recordar mis datos en este dispositivo
+          </label>
         </div>
-        
-        <div class="form-group">
-            <label>💬 Comentarios adicionales (opcional):</label>
-            <textarea id="customer-comments" placeholder="Ej: Timbre rojo, segundo piso..." rows="3"></textarea>
-        </div>
-        
-        <button class="btn-whatsapp" onclick="sendWhatsAppOrder()">
-            <i class="fab fa-whatsapp"></i>
-            Confirmar y Enviar por WhatsApp
-        </button>
-        
-        <button class="btn-clear" onclick="hideCustomerForm()" style="margin-top: 10px;">
-            Cancelar
-        </button>
+      </div>
     </div>
 
-    <script>
-        // 🔧 NÚMERO DE WHATSAPP CONFIGURADO:
-        const WHATSAPP_NUMBER = '5493435075991'; // ← TU NÚMERO CONFIGURADO
+    <div class="panel-pie">
+      <a class="btn-wa" id="btnWhatsApp" href="#" target="_blank" rel="noopener" aria-disabled="true">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.65-2.05-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.2-.24-.58-.48-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.01-1.04 2.47s1.07 2.87 1.22 3.07c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.72 2-1.41.25-.69.25-1.28.17-1.41-.07-.13-.27-.2-.57-.35zM12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.87 9.87 0 004.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0012.04 2z"/></svg>
+        <span id="txtBtnWa">Confirmar por WhatsApp</span>
+      </a>
+      <p class="nota-pie" id="notaPie">Se abre WhatsApp con el pedido escrito. Vos solo tocás enviar.</p>
+    </div>
+  </div>
+</div>
+<!-- Datos estructurados para Google. OJO: los horarios de abajo son un ejemplo,
+     cambiá "opens" y "closes" por los reales antes de que Google los indexe. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "GroceryStore",
+  "name": "La Peruana SRL",
+  "description": "Supermercado y panadería en el corazón de Paraná, con pedidos online y envío a domicilio.",
+  "slogan": "En el corazón de Paraná",
+  "image": "https://andresgamarci.github.io/la-peruana-pedidos/compartir.jpg",
+  "url": "https://andresgamarci.github.io/la-peruana-pedidos/",
+  "telephone": "+5493435075991",
+  "hasMap": "https://www.google.com/maps/search/?api=1&query=Av.+Ram%C3%ADrez+2134+Paran%C3%A1+Entre+R%C3%ADos",
+  "priceRange": "$$",
+  "currenciesAccepted": "ARS",
+  "paymentAccepted": "Efectivo, Transferencia, Tarjeta de débito y crédito",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Av. Ramírez 2134",
+    "addressLocality": "Paraná",
+    "addressRegion": "Entre Ríos",
+    "addressCountry": "AR"
+  },
+  "openingHoursSpecification": [{
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+    "opens": "08:00",
+    "closes": "21:00"
+  }]
+}
+</script>
+<script>
+/* ============================================================
+   1) CONFIGURACIÓN DEL NEGOCIO
+   Todo lo que se cambia seguido está acá arriba.
+   ============================================================ */
+const CONFIG = {
+  // Número de WhatsApp que recibe los pedidos (sin + ni espacios)
+  whatsapp: "5493435075991",
 
-        // Sistema de carrito
-        let cart = {};
-        let total = 0;
-        let selectedPayment = '';
+  // Costo de envío. Poné activo:true cuando quieras cobrarlo.
+  envio: { activo: false, costo: 1500, gratisDesde: 25000 },
 
-        // Datos de productos ACTUALIZADOS
-        const products = {
-            // ROTISERÍA
-            'torrejas': { name: 'Torrejas', price: 471, unit: 'unidad' },
-            'sandwich-simples': { name: 'Sándwich Simples', price: 1100, unit: 'unidad' },
-            'sandwich-triples': { name: 'Sandwich Triples', price: 1844, unit: 'unidad' },
-            'tortilla': { name: 'Tortilla', price: 4782, unit: 'unidad' },
-            'hamburger-cheddar': { name: 'Hamburguesa Cheddar c/ papas', price: 9680, unit: 'unidad' },
-            'hamburger-lp': { name: 'Hamburguesa LP c/ papas', price: 10785, unit: 'unidad' },
-            'patamuslo': { name: 'Patamuslo', price: 5190, unit: 'unidad' },
-            
-            // PANADERÍA
-            'facturas': { name: 'Facturas', price: 735, unit: 'unidad' },
-            'especiales': { name: 'Especiales', price: 614, unit: 'unidad' },
-            'frances': { name: 'Francés', price: 222, unit: 'unidad' },
-            'suizos': { name: 'Suizos', price: 133, unit: 'unidad' },
-            
-            // PASTELERÍA
-            'cheese-cake': { name: 'Cheese cake', price: 6362, unit: 'unidad' },
-            'mini-bombon': { name: 'Mini bombón', price: 1019, unit: 'unidad' },
-            'mini-lemon-pie': { name: 'Mini lemon pie', price: 1019, unit: 'unidad' },
-            'mini-frutal': { name: 'Mini frutal', price: 1551, unit: 'unidad' },
-            'lingote': { name: 'Lingote de durazno o frutilla', price: 2038, unit: 'unidad' },
-            'red-velvet': { name: 'Red velvet', price: 1698, unit: 'unidad' },
-            'tiramisu': { name: 'Tiramisú', price: 3057, unit: 'unidad' },
-            
-            // CARNICERÍA
-            'milanesa-carne': { name: 'Milanesa de Carne', price: 13500, unit: 'kg' },
-            'milanesa-pollo': { name: 'Milanesa de Pollo', price: 12000, unit: 'kg' },
-            'filet-pechuga': { name: 'Filet de Pechuga', price: 15500, unit: 'kg' },
-            'costeletas-cerdo': { name: 'Costeletas Cerdo', price: 8400, unit: 'kg' },
-            
-            // FIAMBRERÍA
-            'picada-fiambres': { name: 'Bandeja Picada de fiambres surtidos x 800 grs', price: 19600, unit: 'bandeja' },
-            'picada-quesos': { name: 'Bandeja picada de quesos surtidos x 700 grs', price: 14900, unit: 'bandeja' },
-            'picada-lario': { name: 'Bandeja Picada Lario x 700 grs', price: 15680, unit: 'bandeja' },
-            'picada-paladini': { name: 'Bandeja Picada Paladini x 700 grs', price: 17641, unit: 'bandeja' },
-            
-            // ALMACÉN
-            'pate-foie': { name: 'Paté de Foie Molto', price: 957, unit: 'unidad' },
-            
-            // BEBIDAS
-            'coca-15': { name: 'Coca Cola 1.5L', price: 3810, unit: 'botella' },
-            'coca-25': { name: 'Coca Cola 2.5L', price: 4999, unit: 'botella' },
-            'levite': { name: 'Agua saborizadas Levité x1.5L', price: 1460, unit: 'botella' },
-            'pritty-limon': { name: 'Pritty Limón 2.25L', price: 1910, unit: 'botella' },
-            'pepsi-3l': { name: 'Pepsi 3L', price: 2987, unit: 'botella' },
-            'vino-otro-loco': { name: 'Vino Otro Loco Más', price: 4736, unit: 'botella' },
-            'vino-finjamos': { name: 'Vino Finjamos Demencia', price: 4784, unit: 'botella' },
-            'vino-hormiga': { name: 'Vino Hormiga Negra', price: 3394, unit: 'botella' },
-            'cerveza-corona': { name: 'Cerveza Corona 330CC', price: 3230, unit: 'botella' },
-            'cerveza-quilmes': { name: 'Cerveza en lata Quilmes 473CC', price: 1258, unit: 'lata' },
-            'cerveza-budweiser': { name: 'Cerveza en lata Budweiser 473CC', price: 1545, unit: 'lata' }
-        };
+  // Monto mínimo de compra. 0 = sin mínimo.
+  minimoCompra: 0,
 
-        // Mostrar sector
-        function showSector(sectorId) {
-            // Ocultar todos los sectores
-            document.querySelectorAll('.products-section').forEach(section => {
-                section.classList.remove('active');
-            });
-            
-            // Quitar active de todos los botones
-            document.querySelectorAll('.sector-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Mostrar sector seleccionado
-            document.getElementById(sectorId).classList.add('active');
-            document.getElementById('btn-' + sectorId).classList.add('active');
-        }
+  // El pedido guardado se borra solo después de estas horas (para que
+  // nadie confirme un carrito viejo con precios desactualizados).
+  horasGuardado: 12
+};
 
-        // Cambiar cantidad
-        function changeQty(productId, change) {
-            const qtyElement = document.getElementById('qty-' + productId);
-            let currentQty = parseInt(qtyElement.textContent) || 0;
-            let newQty = Math.max(0, currentQty + change);
-            
-            qtyElement.textContent = newQty;
-            
-            if (newQty > 0) {
-                cart[productId] = newQty;
-            } else {
-                delete cart[productId];
-            }
-            
-            updateCart();
-        }
+/* ============================================================
+   2) CATÁLOGO
+   Para cambiar un precio, editá el número de "precio".
+   Para ocultar un producto sin borrarlo, agregale:  sinStock: true
+   Para aclarar la unidad de venta, agregale:        unidad: "por kg"
+   Ejemplo:
+     { nombre: "Asado", precio: 12500, unidad: "por kg", imagen: "asado.jpg" },
+   También podés actualizarlos en bloque desde una planilla de Excel,
+   entrando a actualizar-precios.html
+   ============================================================ */
 
-        // Actualizar carrito
-        function updateCart() {
-            total = 0;
-            let itemCount = 0;
-            
-            for (let productId in cart) {
-                if (products[productId]) {
-                    total += products[productId].price * cart[productId];
-                    itemCount += cart[productId];
-                }
-            }
-            
-            // Formatear precio con separadores de miles
-            document.getElementById('cart-total').textContent = `Total: ${total.toLocaleString('es-AR')}`;
-            
-            const cartSummary = document.getElementById('cart-summary');
-            if (itemCount > 0) {
-                cartSummary.classList.add('active');
-            } else {
-                cartSummary.classList.remove('active');
-                hideCustomerForm();
-            }
-        }
+/* === CATALOGO-INICIO — no borres esta línea: la usa la página de actualización === */
+const secciones = [
+      { nombre: "ROTISERIA", productos: [
+        { nombre: "Torrejas", precio: 471, unidad: "por unidad" },
+        { nombre: "Sándwich simples", precio: 1100, unidad: "por unidad" },
+        { nombre: "Sándwich triples", precio: 1844, unidad: "por unidad" },
+        { nombre: "Tortilla", precio: 4782, unidad: "por unidad" },
+        { nombre: "Hamburguesa cheddar c/ papas", precio: 9680, unidad: "por unidad" },
+        { nombre: "Hamburguesa LP c/ papas", precio: 10785, unidad: "por unidad" },
+        { nombre: "Patamuslo", precio: 6000, unidad: "por unidad" }
+      ]},
 
-        // Limpiar carrito
-        function clearCart() {
-            cart = {};
-            total = 0;
-            
-            // Resetear todas las cantidades a 0
-            document.querySelectorAll('.qty-display').forEach(element => {
-                element.textContent = '0';
-            });
-            
-            updateCart();
-        }
+      { nombre: "PANADERIA", productos: [
+        { nombre: "Facturas", precio: 735, unidad: "por unidad" },
+        { nombre: "Especiales", precio: 614, unidad: "por unidad" },
+        { nombre: "Francés", precio: 222, unidad: "por unidad" },
+        { nombre: "Suizos", precio: 133, unidad: "por unidad" }
+      ]},
 
-        // Mostrar formulario de cliente
-        function showCustomerForm() {
-            if (Object.keys(cart).length === 0) {
-                alert('⚠️ Primero agrega productos a tu carrito');
-                return;
-            }
-            
-            document.getElementById('customer-form').classList.add('active');
-            document.getElementById('form-overlay').classList.add('active');
-            document.getElementById('customer-name').focus();
-        }
+      { nombre: "PASTELERIA", productos: [
+        { nombre: "Cheese cake", precio: 6362, unidad: "por unidad" },
+        { nombre: "Mini bombón", precio: 1019, unidad: "por unidad" },
+        { nombre: "Mini lemon pie", precio: 1019, unidad: "por unidad" },
+        { nombre: "Mini frutal", precio: 1551, unidad: "por unidad" },
+        { nombre: "Lingote de durazno o frutilla", precio: 2038, unidad: "por unidad" },
+        { nombre: "Red velvet", precio: 1698, unidad: "por unidad" },
+        { nombre: "Tiramisú", precio: 3057, unidad: "por unidad" }
+      ]},
 
-        // Ocultar formulario de cliente
-        function hideCustomerForm() {
-            document.getElementById('customer-form').classList.remove('active');
-            document.getElementById('form-overlay').classList.remove('active');
-        }
+      { nombre: "CARNICERIA", productos: [
+        { nombre: "Milanesa de carne", precio: 13500, unidad: "por kg" },
+        { nombre: "Milanesa de pollo", precio: 12000, unidad: "por kg" },
+        { nombre: "Filet de pechuga", precio: 15500, unidad: "por kg" },
+        { nombre: "Costeletas de cerdo", precio: 8400, unidad: "por kg" }
+      ]},
 
-        // NUEVA FUNCIÓN: Seleccionar medio de pago
-        function selectPayment(paymentType) {
-            // Quitar selección anterior
-            document.querySelectorAll('.payment-option').forEach(option => {
-                option.classList.remove('selected');
-            });
-            
-            // Seleccionar nuevo medio de pago
-            document.querySelector(`#payment-${paymentType}`).checked = true;
-            document.querySelector(`#payment-${paymentType}`).closest('.payment-option').classList.add('selected');
-            
-            selectedPayment = paymentType;
-            
-            // Mostrar/ocultar detalles de transferencia
-            const transferDetails = document.getElementById('transfer-details');
-            if (paymentType === 'transferencia') {
-                transferDetails.classList.add('show');
-            } else {
-                transferDetails.classList.remove('show');
-            }
-        }
+      /* Estos cuatro estaban rotos en la versión anterior: los botones no sumaban
+         nada y los precios eran una copia de los de rotisería. Quedan ocultos
+         (sinStock) hasta que cargues el precio real desde la planilla. */
+      { nombre: "VERDULERIA", productos: [
+        { nombre: "Zanahorias", precio: 471, unidad: "por kg", sinStock: true },
+        { nombre: "Tomates redondos", precio: 1100, unidad: "por kg", sinStock: true },
+        { nombre: "Manzanas rojas", precio: 4782, unidad: "por kg", sinStock: true },
+        { nombre: "Bananas", precio: 10785, unidad: "por kg", sinStock: true }
+      ]},
 
-        // FUNCIÓN ACTUALIZADA: Enviar pedido por WhatsApp
-        function sendWhatsAppOrder() {
-            // Validar formulario
-            const name = document.getElementById('customer-name').value.trim();
-            const phone = document.getElementById('customer-phone').value.trim();
-            const address = document.getElementById('customer-address').value.trim();
-            const comments = document.getElementById('customer-comments').value.trim();
-            
-            if (!name || !phone || !address) {
-                alert('⚠️ Por favor completa todos los campos obligatorios');
-                return;
-            }
-            
-            if (!selectedPayment) {
-                alert('⚠️ Por favor selecciona un medio de pago');
-                return;
-            }
-            
-            if (Object.keys(cart).length === 0) {
-                alert('⚠️ Tu carrito está vacío');
-                return;
-            }
-            
-            // Crear mensaje de WhatsApp
-            let message = `🛒 *NUEVO PEDIDO - LA PERUANA SRL*\n\n`;
-            message += `👤 *Cliente:* ${name}\n`;
-            message += `📱 *Teléfono:* ${phone}\n`;
-            message += `📍 *Dirección:* ${address}\n\n`;
-            message += `📋 *PEDIDO:*\n`;
-            message += `━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            
-            // Agregar productos del carrito
-            for (let productId in cart) {
-                if (products[productId]) {
-                    const product = products[productId];
-                    const qty = cart[productId];
-                    const subtotal = (product.price * qty);
-                    
-                    message += `• ${product.name}\n`;
-                    message += `  ${qty} ${product.unit}(s) × ${product.price.toLocaleString('es-AR')} = ${subtotal.toLocaleString('es-AR')}\n\n`;
-                }
-            }
-            
-            message += `━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            message += `💰 *TOTAL: ${total.toLocaleString('es-AR')}*\n\n`;
-            
-            // Agregar medio de pago
-            message += `💳 *MEDIO DE PAGO:*\n`;
-            switch(selectedPayment) {
-                case 'mercadopago':
-                    message += `📱 *Mercado Pago* - Pago digital\n\n`;
-                    break;
-                case 'transferencia':
-                    message += `🏦 *Transferencia Bancaria*\n`;
-                    message += `📋 Alias: *laperuanasrl*\n`;
-                    message += `⚠️ Recordá enviar el comprobante\n\n`;
-                    break;
-                case 'efectivo':
-                    message += `💵 *Efectivo* - Pago al recibir\n\n`;
-                    break;
-            }
-            
-            if (comments) {
-                message += `💬 *Comentarios:*\n${comments}\n\n`;
-            }
-            
-            message += `⏰ Fecha: ${new Date().toLocaleString('es-AR')}\n`;
-            message += `🤖 Pedido generado automáticamente`;
-            
-            // Codificar mensaje para URL
-            const encodedMessage = encodeURIComponent(message);
-            
-            // Crear URL de WhatsApp
-            const whatsappURL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
-            
-            // Abrir WhatsApp
-            window.open(whatsappURL, '_blank');
-            
-            // Mostrar confirmación
-            alert('✅ ¡Pedido enviado! Se abrirá WhatsApp para confirmar.');
-            
-            // Ocultar formulario
-            hideCustomerForm();
-            
-            // Limpiar formulario (opcional)
-            setTimeout(() => {
-                if (confirm('¿Quieres limpiar el carrito para un nuevo pedido?')) {
-                    clearCart();
-                    document.getElementById('customer-name').value = '';
-                    document.getElementById('customer-phone').value = '';
-                    document.getElementById('customer-address').value = '';
-                    document.getElementById('customer-comments').value = '';
-                    
-                    // Limpiar selección de pago
-                    selectedPayment = '';
-                    document.querySelectorAll('.payment-option').forEach(option => {
-                        option.classList.remove('selected');
-                    });
-                    document.querySelectorAll('input[name="payment"]').forEach(radio => {
-                        radio.checked = false;
-                    });
-                    document.getElementById('transfer-details').classList.remove('show');
-                }
-            }, 2000);
-        }
+      { nombre: "FIAMBRERIA", productos: [
+        { nombre: "Bandeja picada de fiambres surtidos x 800 grs", precio: 19600, unidad: "por bandeja" },
+        { nombre: "Bandeja picada de quesos surtidos x 700 grs", precio: 14900, unidad: "por bandeja" },
+        { nombre: "Bandeja picada Lario x 700 grs", precio: 15680, unidad: "por bandeja" },
+        { nombre: "Bandeja picada Paladini x 700 grs", precio: 17641, unidad: "por bandeja" }
+      ]},
 
-        // Inicializar
-        document.addEventListener('DOMContentLoaded', function() {
-            // Mostrar rotisería por defecto
-            showSector('rotiseria');
-        });
-    </script>
+      { nombre: "ALMACEN", productos: [
+        { nombre: "Paté de foie Molto", precio: 957, unidad: "por unidad" }
+      ]},
+
+      { nombre: "BEBIDAS", productos: [
+        { nombre: "Coca Cola 1.5 L", precio: 3810, unidad: "por botella" },
+        { nombre: "Coca Cola 2.5 L", precio: 4999, unidad: "por botella" },
+        { nombre: "Agua saborizada Levité 1.5 L", precio: 1460, unidad: "por botella" },
+        { nombre: "Pritty Limón 2.25 L", precio: 1910, unidad: "por botella" },
+        { nombre: "Pepsi 3 L", precio: 2987, unidad: "por botella" },
+        { nombre: "Vino Otro Loco Más", precio: 4736, unidad: "por botella" },
+        { nombre: "Vino Finjamos Demencia", precio: 4784, unidad: "por botella" },
+        { nombre: "Vino Hormiga Negra", precio: 3394, unidad: "por botella" },
+        { nombre: "Cerveza Corona 330 cc", precio: 3230, unidad: "por botella" },
+        { nombre: "Cerveza Quilmes lata 473 cc", precio: 1258, unidad: "por lata" },
+        { nombre: "Cerveza Budweiser lata 473 cc", precio: 1545, unidad: "por lata" }
+      ]}
+];
+/* === CATALOGO-FIN — no borres esta línea === */
+
+/* ============================================================
+   3) LÓGICA — de acá para abajo no hace falta tocar nada
+   ============================================================ */
+(function(){
+  "use strict";
+
+  const $  = (sel) => document.querySelector(sel);
+  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+  const CLAVE_PEDIDO = 'lp_pedido_v2';
+  const CLAVE_DATOS  = 'lp_datos_cliente_v2';
+
+  /* ---------- Utilidades ---------- */
+  const pesos = (n) => '$' + Math.round(n).toLocaleString('es-AR');
+
+  const normalizar = (t) => (t || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ').trim();
+
+  const idDe = (seccion, nombre) =>
+    normalizar(seccion).replace(/\s/g, '-') + '--' + normalizar(nombre).replace(/\s/g, '-');
+
+  /* ---------- Índice plano de productos ---------- */
+  const catalogo = [];
+  secciones.forEach((sec) => {
+    sec.productos.forEach((p) => {
+      if (p.sinStock) return;
+      catalogo.push({
+        id: idDe(sec.nombre, p.nombre),
+        seccion: sec.nombre,
+        nombre: p.nombre,
+        precio: p.precio,
+        unidad: p.unidad || '',
+        imagen: p.imagen || '',
+        busqueda: normalizar(sec.nombre + ' ' + p.nombre)
+      });
+    });
+  });
+  const porId = Object.fromEntries(catalogo.map((p) => [p.id, p]));
+  const nombresSeccion = secciones.map((s) => s.nombre).filter(
+    (n) => catalogo.some((p) => p.seccion === n)
+  );
+
+  /* ---------- Estado ---------- */
+  let pedido = cargarPedido();   // { id: cantidad }
+  let seccionActiva = 'TODO';
+  let textoBusqueda = '';
+
+  function cargarPedido(){
+    try {
+      const guardado = JSON.parse(localStorage.getItem(CLAVE_PEDIDO) || 'null');
+      if (!guardado || !guardado.items) return {};
+      const vencido = (Date.now() - (guardado.fecha || 0)) > CONFIG.horasGuardado * 3600000;
+      if (vencido) { localStorage.removeItem(CLAVE_PEDIDO); return {}; }
+      const limpio = {};
+      for (const id in guardado.items) {
+        if (porId[id] && guardado.items[id] > 0) limpio[id] = guardado.items[id];
+      }
+      return limpio;
+    } catch (e) { return {}; }
+  }
+
+  function guardarPedido(){
+    try {
+      localStorage.setItem(CLAVE_PEDIDO, JSON.stringify({ fecha: Date.now(), items: pedido }));
+    } catch (e) { /* modo privado del navegador */ }
+  }
+
+  function totales(){
+    let items = 0, subtotal = 0;
+    for (const id in pedido) {
+      const p = porId[id];
+      if (!p) continue;
+      items += pedido[id];
+      subtotal += pedido[id] * p.precio;
+    }
+    let envio = 0;
+    if (CONFIG.envio.activo && items > 0) {
+      const gratis = CONFIG.envio.gratisDesde > 0 && subtotal >= CONFIG.envio.gratisDesde;
+      envio = gratis ? 0 : CONFIG.envio.costo;
+    }
+    return { items, subtotal, envio, total: subtotal + envio };
+  }
+
+  /* ---------- Catálogo en pantalla ---------- */
+  function pintarFichas(){
+    const cont = $('#fichas');
+    const lista = ['TODO'].concat(nombresSeccion);
+    cont.innerHTML = lista.map((n) => {
+      const activa = n === seccionActiva;
+      const rotulo = n === 'TODO' ? 'Todo' : n.charAt(0) + n.slice(1).toLowerCase();
+      return `<button class="ficha" type="button" data-seccion="${n}" aria-pressed="${activa}">${rotulo}</button>`;
+    }).join('');
+  }
+
+  function tarjeta(p){
+    const cant = pedido[p.id] || 0;
+    const control = cant > 0
+      ? `<div class="paso">
+           <button type="button" data-id="${p.id}" data-accion="menos" aria-label="Quitar uno de ${p.nombre}">−</button>
+           <span class="cant" id="c-${p.id}">${cant}</span>
+           <button type="button" data-id="${p.id}" data-accion="mas" aria-label="Agregar otro ${p.nombre}">+</button>
+         </div>`
+      : `<button class="btn-agregar" type="button" data-id="${p.id}" data-accion="mas">Agregar</button>`;
+
+    return `<article class="producto${cant > 0 ? ' en-carrito' : ''}" id="p-${p.id}">
+      <div class="producto-datos">
+        <h3 class="producto-nombre">${p.nombre}</h3>
+        <div class="producto-precio">
+          <span class="valor">${pesos(p.precio)}</span>${p.unidad ? `<span class="unidad">${p.unidad}</span>` : ''}
+        </div>
+      </div>
+      ${control}
+    </article>`;
+  }
+
+  function pintarCatalogo(){
+    const cont = $('#catalogo');
+    const q = normalizar(textoBusqueda);
+    const palabras = q ? q.split(' ') : [];
+
+    const visibles = catalogo.filter((p) => {
+      const porSeccion = seccionActiva === 'TODO' || p.seccion === seccionActiva;
+      const porTexto = !palabras.length || palabras.every((w) => p.busqueda.includes(w));
+      return porSeccion && porTexto;
+    });
+
+    if (!visibles.length) {
+      cont.innerHTML = `<div class="sin-resultados">
+        <strong>No encontramos “${textoBusqueda}”</strong>
+        Probá con otra palabra o mirá todas las categorías.
+        <div><button type="button" id="btnReiniciarFiltros">Ver todos los productos</button></div>
+      </div>`;
+      return;
+    }
+
+    // Buscando: una sola grilla con los resultados. Sin buscar: por secciones.
+    if (palabras.length) {
+      cont.innerHTML = `<section class="seccion">
+        <div class="seccion-cab">
+          <h2>Resultados</h2>
+          <span>${visibles.length} producto${visibles.length === 1 ? '' : 's'}</span>
+        </div>
+        <div class="grilla">${visibles.map(tarjeta).join('')}</div>
+      </section>`;
+      return;
+    }
+
+    const grupos = seccionActiva === 'TODO' ? nombresSeccion : [seccionActiva];
+    cont.innerHTML = grupos.map((nombre) => {
+      const items = visibles.filter((p) => p.seccion === nombre);
+      if (!items.length) return '';
+      return `<section class="seccion" id="s-${normalizar(nombre).replace(/\s/g,'-')}">
+        <div class="seccion-cab">
+          <h2>${nombre}</h2>
+          <span>${items.length} producto${items.length === 1 ? '' : 's'}</span>
+        </div>
+        <div class="grilla">${items.map(tarjeta).join('')}</div>
+      </section>`;
+    }).join('');
+  }
+
+  /* ---------- Indicadores de pedido ---------- */
+  let temporizadorAviso;
+  function avisar(texto){
+    const a = $('#aviso');
+    a.textContent = texto;
+    a.classList.add('visible');
+    clearTimeout(temporizadorAviso);
+    temporizadorAviso = setTimeout(() => a.classList.remove('visible'), 1800);
+  }
+
+  function refrescarIndicadores(){
+    const t = totales();
+    $('#topCant').textContent = t.items;
+    $('#topMonto').textContent = pesos(t.subtotal);
+    $('#barraItems').textContent = t.items + (t.items === 1 ? ' producto' : ' productos');
+    $('#barraTotal').textContent = pesos(t.total);
+    $('#barraPedido').classList.toggle('visible', t.items > 0);
+  }
+
+  function cambiarCantidad(id, delta){
+    const actual = pedido[id] || 0;
+    const nueva = Math.max(0, Math.min(99, actual + delta));
+    if (nueva === 0) delete pedido[id]; else pedido[id] = nueva;
+    guardarPedido();
+
+    // Actualiza la tarjeta sin repintar todo el catálogo
+    const tarj = document.getElementById('p-' + id);
+    if (tarj) {
+      const p = porId[id];
+      tarj.outerHTML = tarjeta(p);
+    }
+    refrescarIndicadores();
+    if (delta > 0 && actual === 0) avisar(porId[id].nombre + ' agregado');
+    if ($('#fondoPanel').classList.contains('abierto')) pintarPedido();
+  }
+
+  /* ---------- Panel de pedido ---------- */
+  function pintarPedido(){
+    const lista = $('#listaPedido');
+    const ids = Object.keys(pedido);
+    const t = totales();
+
+    if (!ids.length) {
+      lista.innerHTML = `<div class="vacio">
+        <strong>Todavía no elegiste nada</strong>
+        Cerrá esta ventana y tocá “Agregar” en los productos que quieras.
+      </div>`;
+      $('#bloqueTotales').hidden = true;
+      $('#entrega').hidden = true;
+      actualizarBotonWa();
+      return;
+    }
+
+    lista.innerHTML = ids.map((id) => {
+      const p = porId[id];
+      const cant = pedido[id];
+      return `<div class="linea-item">
+        <div>
+          <div class="linea-nombre">${p.nombre}</div>
+          <div class="linea-unit">${pesos(p.precio)} c/u${p.unidad ? ' · ' + p.unidad : ''}</div>
+        </div>
+        <div class="linea-der">
+          <div class="paso-mini">
+            <button type="button" data-id="${id}" data-accion="menos" aria-label="Quitar uno de ${p.nombre}">−</button>
+            <span class="cant">${cant}</span>
+            <button type="button" data-id="${id}" data-accion="mas" aria-label="Agregar otro ${p.nombre}">+</button>
+          </div>
+          <span class="linea-sub">${pesos(cant * p.precio)}</span>
+        </div>
+      </div>`;
+    }).join('');
+
+    $('#bloqueTotales').hidden = false;
+    $('#entrega').hidden = false;
+    $('#subtotal').textContent = pesos(t.subtotal);
+
+    if (CONFIG.envio.activo) {
+      $('#filaEnvio').hidden = false;
+      const gratis = t.envio === 0;
+      $('#rotuloEnvio').textContent = gratis ? 'Envío (bonificado)' : 'Envío';
+      $('#montoEnvio').textContent = gratis ? 'Gratis' : pesos(t.envio);
+    }
+    $('#total').textContent = pesos(t.total);
+    actualizarBotonWa();
+  }
+
+  function abrirPanel(){
+    pintarPedido();
+    precargarDatos();
+    $('#fondoPanel').classList.add('abierto');
+    document.body.style.overflow = 'hidden';
+    $('#btnCerrarPanel').focus();
+  }
+  function cerrarPanel(){
+    $('#fondoPanel').classList.remove('abierto');
+    document.body.style.overflow = '';
+    $('#btnCarritoTop').focus();
+  }
+
+  /* ---------- Datos del cliente ---------- */
+  const CAMPOS = ['inpNombre','inpTelefono','selFranja','inpDireccion','selPago','inpVuelto','inpNotas'];
+
+  function precargarDatos(){
+    try {
+      const d = JSON.parse(localStorage.getItem(CLAVE_DATOS) || '{}');
+      CAMPOS.forEach((id) => { if (d[id]) $('#' + id).value = d[id]; });
+      if (typeof d.recordar === 'boolean') $('#chkRecordar').checked = d.recordar;
+    } catch (e) {}
+    alternarPago();
+    actualizarBotonWa();
+  }
+
+  function guardarDatos(){
+    if (!$('#chkRecordar').checked) { localStorage.removeItem(CLAVE_DATOS); return; }
+    const d = { recordar: true };
+    CAMPOS.forEach((id) => { d[id] = $('#' + id).value; });
+    try { localStorage.setItem(CLAVE_DATOS, JSON.stringify(d)); } catch (e) {}
+  }
+
+  function alternarPago(){
+    const forma = $('#selPago').value;
+    $('#cVuelto').hidden = forma !== 'Efectivo';
+    // Antes de que confirmemos, nadie tiene que pagar nada
+    const digital = (forma === 'Transferencia' || forma === 'Mercado Pago');
+    $('#notaTransfer').hidden = !digital;
+    $('#aliasTransfer').hidden = (forma !== 'Transferencia');
+  }
+
+  const REGLAS = {
+    inpNombre:    { campo: 'cNombre',    prueba: () => $('#inpNombre').value.trim().length >= 2 },
+    inpTelefono:  { campo: 'cTelefono',  prueba: () => ($('#inpTelefono').value.match(/\d/g) || []).length >= 8 },
+    selFranja:    { campo: 'cFranja',    prueba: () => $('#selFranja').value !== '' },
+    inpDireccion: { campo: 'cDireccion', prueba: () => $('#inpDireccion').value.trim().length >= 5 },
+    selPago:      { campo: 'cPago',      prueba: () => $('#selPago').value !== '' }
+  };
+
+  // Marca el error de un solo campo (al salir de él)
+  function validarCampo(idInput){
+    const r = REGLAS[idInput];
+    if (!r) return;
+    $('#' + r.campo).classList.toggle('error', !r.prueba());
+  }
+
+  // Saca el aviso de error apenas el dato pasa a ser correcto. Nunca lo agrega.
+  function limpiarErrores(){
+    Object.keys(REGLAS).forEach((id) => {
+      if (REGLAS[id].prueba()) $('#' + REGLAS[id].campo).classList.remove('error');
+    });
+  }
+
+  // Revisa todo junto, al confirmar
+  function validar(marcar){
+    let ok = true, primerError = null;
+    Object.keys(REGLAS).forEach((id) => {
+      const valido = REGLAS[id].prueba();
+      if (!valido) { ok = false; if (!primerError) primerError = REGLAS[id].campo; }
+      if (marcar) $('#' + REGLAS[id].campo).classList.toggle('error', !valido);
+    });
+    return { ok, primerError };
+  }
+
+  /* ---------- Mensaje de WhatsApp ---------- */
+  function armarMensaje(){
+    const t = totales();
+    const L = [];
+    L.push('*NUEVO PEDIDO — La Peruana SRL*');
+    L.push('');
+    L.push('👤 ' + $('#inpNombre').value.trim());
+    L.push('📞 ' + $('#inpTelefono').value.trim());
+    L.push('📍 ' + $('#inpDireccion').value.trim());
+    L.push('🕒 ' + $('#selFranja').value);
+    L.push('💵 ' + $('#selPago').value + ($('#selPago').value === 'Efectivo' && $('#inpVuelto').value.trim()
+      ? ' (abona con $' + $('#inpVuelto').value.trim() + ')' : ''));
+    const notas = $('#inpNotas').value.trim();
+    if (notas) L.push('📝 ' + notas);
+    L.push('');
+    L.push('*Detalle*');
+    Object.keys(pedido).forEach((id) => {
+      const p = porId[id];
+      L.push('• ' + pedido[id] + ' x ' + p.nombre + ' — ' + pesos(pedido[id] * p.precio));
+    });
+    L.push('');
+    if (CONFIG.envio.activo) {
+      L.push('Subtotal: ' + pesos(t.subtotal));
+      L.push('Envío: ' + (t.envio === 0 ? 'bonificado' : pesos(t.envio)));
+    }
+    L.push('*TOTAL: ' + pesos(t.total) + '*');
+    L.push('_(sin incluir el envío)_');
+    L.push('');
+    L.push('Quedo a la espera de la confirmación, del costo del envío y de los datos para pagar.');
+    L.push('Gracias 🙌');
+    return L.join('\n');
+  }
+
+  function actualizarBotonWa(){
+    const btn = $('#btnWhatsApp');
+    const txt = $('#txtBtnWa');
+    const nota = $('#notaPie');
+    const t = totales();
+
+    if (t.items === 0) {
+      btn.setAttribute('aria-disabled', 'true');
+      btn.removeAttribute('href');
+      txt.textContent = 'Agregá productos al pedido';
+      nota.textContent = 'Tu pedido está vacío.';
+      return;
+    }
+    if (CONFIG.minimoCompra > 0 && t.subtotal < CONFIG.minimoCompra) {
+      btn.setAttribute('aria-disabled', 'true');
+      btn.removeAttribute('href');
+      txt.textContent = 'Mínimo ' + pesos(CONFIG.minimoCompra);
+      nota.textContent = 'Te faltan ' + pesos(CONFIG.minimoCompra - t.subtotal) + ' para llegar al mínimo.';
+      return;
+    }
+    btn.removeAttribute('aria-disabled');
+    txt.textContent = 'Confirmar por WhatsApp';
+    nota.textContent = 'Se abre WhatsApp con el pedido escrito. Vos solo tocás enviar.';
+    btn.href = 'https://wa.me/' + CONFIG.whatsapp + '?text=' + encodeURIComponent(armarMensaje());
+  }
+
+  /* ---------- Eventos ---------- */
+  // Sumar y restar (catálogo y panel, con un solo listener)
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-accion]');
+    if (!btn) return;
+    cambiarCantidad(btn.dataset.id, btn.dataset.accion === 'mas' ? 1 : -1);
+  });
+
+  // Categorías
+  $('#fichas').addEventListener('click', (e) => {
+    const f = e.target.closest('.ficha');
+    if (!f) return;
+    seccionActiva = f.dataset.seccion;
+    pintarFichas();
+    pintarCatalogo();
+    window.scrollTo({ top: $('#catalogo').offsetTop - 130, behavior: 'smooth' });
+  });
+
+  // Buscador
+  let temporizadorBusqueda;
+  $('#inpBuscar').addEventListener('input', (e) => {
+    textoBusqueda = e.target.value;
+    $('#btnLimpiarBusq').classList.toggle('visible', textoBusqueda.length > 0);
+    clearTimeout(temporizadorBusqueda);
+    temporizadorBusqueda = setTimeout(pintarCatalogo, 130);
+  });
+  $('#btnLimpiarBusq').addEventListener('click', () => {
+    textoBusqueda = '';
+    $('#inpBuscar').value = '';
+    $('#btnLimpiarBusq').classList.remove('visible');
+    pintarCatalogo();
+    $('#inpBuscar').focus();
+  });
+  document.addEventListener('click', (e) => {
+    if (e.target.id !== 'btnReiniciarFiltros') return;
+    textoBusqueda = '';
+    seccionActiva = 'TODO';
+    $('#inpBuscar').value = '';
+    $('#btnLimpiarBusq').classList.remove('visible');
+    pintarFichas();
+    pintarCatalogo();
+  });
+
+  // Abrir y cerrar el panel
+  $('#btnVerPedido').addEventListener('click', abrirPanel);
+  $('#btnCarritoTop').addEventListener('click', abrirPanel);
+  $('#btnCerrarPanel').addEventListener('click', cerrarPanel);
+  $('#fondoPanel').addEventListener('click', (e) => { if (e.target.id === 'fondoPanel') cerrarPanel(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && $('#fondoCartel').classList.contains('abierto')) { cerrarCartel(); return; }
+    if (e.key === 'Escape' && $('#fondoPanel').classList.contains('abierto')) cerrarPanel();
+    if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+      e.preventDefault(); $('#inpBuscar').focus();
+    }
+  });
+
+  // Vaciar
+  $('#btnVaciar').addEventListener('click', () => {
+    if (!confirm('¿Querés vaciar el pedido?')) return;
+    pedido = {};
+    guardarPedido();
+    pintarCatalogo();
+    pintarPedido();
+    refrescarIndicadores();
+  });
+
+  // Formulario
+  CAMPOS.concat('chkRecordar').forEach((id) => {
+    const el = $('#' + id);
+    if (!el) return;
+    el.addEventListener('input', () => { limpiarErrores(); guardarDatos(); actualizarBotonWa(); });
+    el.addEventListener('change', () => {
+      if (id === 'selPago') alternarPago();
+      limpiarErrores(); guardarDatos(); actualizarBotonWa();
+    });
+    el.addEventListener('blur', () => validarCampo(id));
+  });
+
+  // Confirmación
+  $('#btnWhatsApp').addEventListener('click', (e) => {
+    e.preventDefault();   // el envío pasa siempre por el cartel de aviso
+    if ($('#btnWhatsApp').getAttribute('aria-disabled') === 'true') return;
+
+    const r = validar(true);
+    if (!r.ok) {
+      const campo = $('#' + r.primerError);
+      campo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const foco = campo.querySelector('input, select');
+      if (foco) foco.focus({ preventScroll: true });
+      avisar('Faltan datos de entrega');
+      return;
+    }
+    abrirCartel();
+  });
+
+  function abrirCartel(){
+    $('#btnIrWhatsApp').href = $('#btnWhatsApp').href;
+    $('#fondoCartel').classList.add('abierto');
+    $('#btnIrWhatsApp').focus();
+  }
+  function cerrarCartel(){
+    $('#fondoCartel').classList.remove('abierto');
+    $('#btnWhatsApp').focus();
+  }
+  $('#btnVolverCartel').addEventListener('click', cerrarCartel);
+  $('#fondoCartel').addEventListener('click', (e) => { if (e.target.id === 'fondoCartel') cerrarCartel(); });
+  // El link se abre solo (es un gesto del usuario, no lo bloquea el navegador)
+  $('#btnIrWhatsApp').addEventListener('click', () => setTimeout(cerrarCartel, 200));
+
+  // El foco no se escapa del cartel mientras está abierto
+  $('#fondoCartel').addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab') return;
+    const foco = $$('#fondoCartel button, #fondoCartel a[href]');
+    if (!foco.length) return;
+    const primero = foco[0], ultimo = foco[foco.length - 1];
+    if (e.shiftKey && document.activeElement === primero) { e.preventDefault(); ultimo.focus(); }
+    else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primero.focus(); }
+  });
+
+  // Foco atrapado dentro del panel
+  $('#fondoPanel').addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab') return;
+    const foco = $$('#fondoPanel button, #fondoPanel input, #fondoPanel select, #fondoPanel textarea, #fondoPanel a[href]')
+      .filter((el) => el.offsetParent !== null);
+    if (!foco.length) return;
+    const primero = foco[0], ultimo = foco[foco.length - 1];
+    if (e.shiftKey && document.activeElement === primero) { e.preventDefault(); ultimo.focus(); }
+    else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primero.focus(); }
+  });
+
+  // Altura real de la barra pegajosa, para que los títulos no queden tapados
+  function medirBarra(){
+    const alto = $('#barraFiltros').offsetHeight + 12;
+    document.documentElement.style.setProperty('--alto-barra', alto + 'px');
+  }
+  window.addEventListener('resize', medirBarra);
+
+  /* ---------- Arranque ---------- */
+  $('#waPie').href = 'https://wa.me/' + CONFIG.whatsapp;
+  $('#inpBuscar').placeholder = 'Buscar entre ' + catalogo.length + ' productos…';
+  pintarFichas();
+  pintarCatalogo();
+  refrescarIndicadores();
+  medirBarra();
+})();
+</script>
 </body>
-
 </html>
-
